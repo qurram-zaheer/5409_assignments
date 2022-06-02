@@ -1,0 +1,20 @@
+version: '3'
+services:
+  container1:
+    image: qurramzaheer/5409_a1_container1
+    container_name: container1
+    ports:
+      - 5000:5000
+    volumes:
+      - type: bind
+        source: .
+        target: /data
+    
+
+  container2:
+    image: qurramzaheer/5409_a1_container2
+    container_name: container2
+    volumes:
+      - type: bind
+        source: .
+        target: /data
