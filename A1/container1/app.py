@@ -20,6 +20,8 @@ def get_checksum():
         print("File list", os.listdir(os.path.join('', '/data')))
         if not os.path.exists(os.path.join('', '/data', file)):
             return {"file": file, "error": "File not found."}
+        if os.path.isdir(os.path.join('', '/data', file)):
+            return {"file": file, "error": "File not found."}
         res = requests.post("http://container2:5000/", json={"file": file})
         print(res.json())
         return res.json(), 200
