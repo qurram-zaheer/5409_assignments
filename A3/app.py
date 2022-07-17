@@ -1,16 +1,10 @@
 import base64
 
-import rsa
 from flask import Flask, request
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 
 app = Flask(__name__)
-
-
-@app.route('/')
-def hello_world():  # put application's code here
-    return 'Hello World!'
 
 
 @app.route('/decrypt', methods=['POST'])
