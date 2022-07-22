@@ -1,0 +1,105 @@
+{
+  "Comment": "A description of my state machine",
+  "StartAt": "Lambda Invoke",
+  "States": {
+    "Lambda Invoke": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "arn:aws:lambda:us-east-1:793906365878:function:tier_classifier:$LATEST"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Tier 3?"
+    },
+    "Tier 3?": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.tier",
+          "NumericEquals": 3,
+          "Next": "Tier 3"
+        }
+      ],
+      "Default": "Tier 2?"
+    },
+    "Tier 3": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "MessageBody.$": "$",
+        "QueueUrl": "https://sqs.us-east-1.amazonaws.com/793906365878/b00902314_tier3"
+      },
+      "End": true,
+      "ResultPath": null,
+      "InputPath": "$.result"
+    },
+    "Tier 2?": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.tier",
+          "NumericEquals": 2,
+          "Next": "Tier 2"
+        }
+      ],
+      "Default": "Tier 1?"
+    },
+    "Tier 2": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "MessageBody.$": "$",
+        "QueueUrl": "https://sqs.us-east-1.amazonaws.com/793906365878/b00902314_tier2"
+      },
+      "End": true,
+      "ResultPath": null,
+      "InputPath": "$.result"
+    },
+    "Tier 1?": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.tier",
+          "NumericEquals": 1,
+          "Next": "Tier 1"
+        }
+      ],
+      "Default": "Tier unknown"
+    },
+    "Tier 1": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "MessageBody.$": "$",
+        "QueueUrl": "https://sqs.us-east-1.amazonaws.com/793906365878/boo902314_tier1"
+      },
+      "End": true,
+      "ResultPath": null,
+      "InputPath": "$.result"
+    },
+    "Tier unknown": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "MessageBody.$": "$",
+        "QueueUrl": "https://sqs.us-east-1.amazonaws.com/793906365878/b00902314_unknown"
+      },
+      "End": true,
+      "ResultPath": null,
+      "InputPath": "$.result"
+    }
+  }
+}
